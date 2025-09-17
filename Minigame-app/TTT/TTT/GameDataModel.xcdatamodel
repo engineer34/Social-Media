@@ -1,0 +1,6 @@
+<model name="GameDataModel" userDefinedModelVersionIdentifier="">
+  <entity name="Score" representedClassName="Score" syncable="YES">
+    <attribute name="points" optional="NO" attributeType="Integer 32" defaultValueString="0"/>
+    <attribute name="game" optional="YES" attributeType="String"/>
+  </entity>
+</model>
