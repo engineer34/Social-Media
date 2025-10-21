@@ -1,0 +1,102 @@
+[
+  {
+    "image": "post1",
+    "like_count": 52,
+    "comment_count": 11,
+    "view_count": 1200,
+    "description": "Learn the basics of Python programming!",
+    "profile_img": "cat2",
+    "profile_name": "Jason Avila",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post2",
+    "like_count": 60,
+    "comment_count": 10,
+    "view_count": 150,
+    "description": "Discover the latest JavaScript frameworks!",
+    "profile_img": "cat",
+    "profile_name": "Jason Avila",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post3",
+    "like_count": 160,
+    "comment_count": 24,
+    "view_count": 2090,
+    "description": "Explore machine learning algorithms in R!",
+    "profile_img": "bear",
+    "profile_name": "John Adam",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post4",
+    "like_count": 116,
+    "comment_count": 17,
+    "view_count": 111,
+    "description": "Tips for optimizing your SQL queries!",
+    "profile_img": "deer",
+    "profile_name": "Adem David",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post5",
+    "like_count": 70,
+    "comment_count": 18,
+    "view_count": 1400,
+    "description": "Tips for optimizing your SQL queries!",
+    "profile_img": "cat2",
+    "profile_name": "Mohammad Salah",
+    "profile_id": "gabrial_micheal"
+  },
+  {
+    "image": "post6",
+    "like_count": 90,
+    "comment_count": 20,
+    "view_count": 1800,
+    "description": "Introduction to data structures in C++!",
+    "profile_img": "cat",
+    "profile_name": "Jay Garcia",
+    "profile_id": "Jay_Garcia"
+  },
+  {
+    "image": "post7",
+    "like_count": 60,
+    "comment_count": 14,
+    "view_count": 1300,
+    "description": "Build a RESTful API using Node.js and Express!",
+    "profile_img": "bear",
+    "profile_name": "Adam Mohammad",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post8",
+    "like_count": 100,
+    "comment_count": 22,
+    "view_count": 2200,
+    "description": "Introduction to object-oriented programming concepts!",
+    "profile_img": "deer",
+    "profile_name": "John Avila",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post9",
+    "like_count": 75,
+    "comment_count": 16,
+    "view_count": 1600,
+    "description": "Exploring the world of front-end web development!",
+    "profile_img": "cat2",
+    "profile_name": "Adam Adam",
+    "profile_id": "jason_avila"
+  },
+  {
+    "image": "post10",
+    "like_count": 110,
+    "comment_count": 30,
+    "view_count": 2400,
+    "description": "Mastering algorithms and data structures in Java!",
+    "profile_img": "cat",
+    "profile_name": "Gabrial Michael",
+    "profile_id": "jason_avila"
+  }
+]
