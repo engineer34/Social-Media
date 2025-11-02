@@ -16,7 +16,7 @@ struct PostBody: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Image(image)
+            Image("image1")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .roundedCorner(20, corners: [.bottomLeft, .topRight, .bottomRight])
