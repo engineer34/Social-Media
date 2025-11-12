@@ -8,15 +8,15 @@ import Foundation
 
 // Struct for representing a post
 struct Post: Codable, Identifiable {
-    enum CodingKeys: CodingKey {
+    enum CodingKeys: String, CodingKey {
         case image
-        case like_count
-        case comment_count
-        case view_count
+        case like_count = "like_count"
+        case comment_count = "comment_count"
+        case view_count = "view_count"
         case description
-        case profile_img
-        case profile_name
-        case profile_id
+        case profile_img = "profile_img"
+        case profile_name = "profile_name"
+        case profile_id = "profile_id"
     }
     
     var id = UUID() // Unique identifier for the post
@@ -43,10 +43,13 @@ class ReadJsonData: ObservableObject {
             print("json file not found")
             return
         }
-        
-        let data = try? Data(contentsOf: url)
-        let posts = try? JSONDecoder().decode([Post].self, from: data!)
-        
-        self.posts = posts! // Update the posts array with the decoded data
+        do {
+            let data = try Data(contentsOf: url)
+            let decodedPosts = try JSONDecoder().decode([Post].self, from: data)
+            self.posts = decodedPosts
+            print(" Loaded \(decodedPosts.count) posts successfully")
+        } catch {
+            print(" didn't load \(error)")
+        }
     }
 }

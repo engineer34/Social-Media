@@ -4,70 +4,124 @@
 //
 //  Created by Feliciano Medina on 9/17/25.
 //
-
+import FirebaseFirestore
 import SwiftUI
 import FirebaseAuth
 struct MainView: View {
     // this connects to the same key as in ContentView, so when you log out,
        // it automatically switches back to the login screen
     @AppStorage("isLoggedIn") var isLoggedIn = false
+    //firsetore connection and posts list
+    @State private var posts: [PostModel] = []
+    private let db = Firestore.firestore()
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottomTrailing) {
-                //  ScrollView(.vertical) {
-                
-                // welcome thwem to rayo
-                VStack(spacing: 12) {
-                    statusView
-                        .padding(.top, -18) //move my stories more up
-                    
-                    Text("Welcome to Rayo!")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(.gray)
-                        .padding(.top, 4)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal)
-                
-                // create logout button
-                
-                Button(action: {
-                    do {
-                        try Auth.auth().signOut()
-                        isLoggedIn = false
-                    } catch {
-                        print("Logout failed: \(error.localizedDescription)")
+        NavigationStack {
+                    VStack {
+                        // Top bar with app title and logout
+                        HStack {
+                            Text("Rayo")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            Spacer()
+                            Button(action: logoutUser) {
+                                Text("Logout")
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.red)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 10)
+
+                        // Scrollable stories and posts
+                        ScrollView(.vertical, showsIndicators: false) {
+                            VStack(spacing: 20) {
+                                Story()
+                                PostListView()
+                            }
+                            .padding(.bottom, 80)
+                        }
                     }
-                }) { //logout buttom
-                    Text("Logout")
-                        .font(.headline)
-                        .foregroundColor(.red)
-                        .padding()
-                    
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                        .shadow(radius: 2)
+                    .navigationBarHidden(true)
+                    .onAppear(perform: fetchPosts)
                 }
-                .padding(.trailing, 20)
-                .padding(.bottom, 20)
             }
-            
-            .navigationTitle("Rayo")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Image(systemName: "camera")
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "ellipsis")
+    func fetchPosts() {
+          db.collection("posts")
+              .order(by: "timestamp", descending: true)
+              .getDocuments { snapshot, error in
+                  if let error = error {
+                      print("Error fetching posts: \(error.localizedDescription)")
+                      return
+                  }
+                  posts = snapshot?.documents.compactMap { doc in
+                      let data = doc.data()
+                      let text = data["text"] as? String ?? ""
+                      let timestamp = (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
+                      return PostModel(text: text, timestamp: timestamp)
+                  } ?? []
+              }
+      }
+            // Logs out the user and returns to login screen
+            private func logoutUser() {
+                do {
+                    try Auth.auth().signOut()
+                    isLoggedIn = false  //  This triggers ContentView to show Login page
+                } catch {
+                    print("Error signing out: \(error.localizedDescription)")
                 }
             }
         }
-    }
-    
-    private var statusView: some View {
+
+
+        
+        /*NavigationView {
+            ZStack(alignment: .bottomTrailing) {
+                //  ScrollView(.vertical) {
+                ScrollView {
+                // welcome thwem to rayo
+                VStack(spacing: 12) {
+                    Story()
+                        .padding(.top, 8)
+                    //move my stories more up
+                    ForEach(0..<5) { _ in
+                    PostListView()
+                    }
+                    
+                }
+                .padding(.horizontal)
+            }
+                // create logout button
+                
+            Button(action: logoutUser) {
+                                Text("Logout")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(Color.red)
+                                    .cornerRadius(12)
+                                    .shadow(radius: 3)
+                            }
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 20)
+                        }
+                        .navigationTitle("Rayo")
+                        .navigationBarTitleDisplayMode(.inline)
+                    }
+                }
+private func logoutUser() {
+      do {
+          try Auth.auth().signOut()
+          isLoggedIn = false
+      } catch {
+          print("Error signing out: \(error.localizedDescription)")
+      }
+  }
+}
+  /*  private var statusView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 Image("image4")
@@ -97,8 +151,8 @@ struct MainView: View {
             .padding()
         }
     }
-}
-/*struct MainView: View {
+}*/
+struct MainView: View {
     //var currentUser: String
     
     var body: some View {

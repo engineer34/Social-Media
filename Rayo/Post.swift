@@ -12,23 +12,13 @@ struct PostListView: View {
     
     var body: some View {
         VStack {
-            List(postData.posts) { post in // Iterate over each post in the data
-                PostCard(
-                    profile_img: post.profile_img,
-                    profile_name: post.profile_name,
-                    profile_id: post.profile_id,
-                    image: post.image,
-                    like_count: post.like_count,
-                    comment_count: post.comment_count,
-                    view_count: post.view_count,
-                    description: post.description
-                )
-              //  .padding(.top)
+            ForEach(postData.posts) { post in // Iterate over each post in the data
+                PostCard(post: post)
+                .padding(.top)
             }
             
         }
-        .listStyle(.plain) // Set the list style to plain
-        //.padding() // Apply padding to the VStack
+        
     }
 }
 

@@ -14,7 +14,7 @@ struct Header: View {
     
     var body: some View {
         HStack {
-            Image("dog")
+            Image(profile_img)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 40, height: 40)
@@ -29,5 +29,6 @@ struct Header: View {
             Spacer()
             Image(systemName: "ellipsis")
         }
+        .padding(.horizontal)
     }
 }

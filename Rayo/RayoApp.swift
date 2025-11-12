@@ -21,7 +21,8 @@ struct RayoApp: App {
     }
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavView()
+            //ContentView()
         }
     }
 }

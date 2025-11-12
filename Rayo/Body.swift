@@ -16,10 +16,10 @@ struct PostBody: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Image("image1")
+            Image(image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .roundedCorner(20, corners: [.bottomLeft, .topRight, .bottomRight])
+                .clipShape(RoundedRectangle(cornerRadius: 20))
             
             HStack {
                 HStack(spacing: 3) {
@@ -48,8 +48,9 @@ struct PostBody: View {
                 .multilineTextAlignment(.leading)
                 .font(.callout)
                 .foregroundColor(.gray)
+                .padding(.horizontal)
         }
-        .padding(.leading, 55)
+        
     }
   
 

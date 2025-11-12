@@ -7,12 +7,32 @@
 
 import SwiftUI
 
-struct AuthView: View {
+struct NavView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        TabView {
+            MainView()
+                .tabItem {
+                    Image(systemName: "square.stack.fill")
+                }
+            Text("Search View")
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                }
+            Text("New Post")
+                .tabItem {
+                    Image(systemName: "square.and.pencil")
+                }
+            Pro()
+                .tabItem {
+                    Image(systemName: "person")
+                }
+        }
+        .accentColor(.brown)
+    }
+}
+struct NavView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavView()
     }
 }
 
-#Preview {
-    AuthView()
-}
