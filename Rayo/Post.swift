@@ -8,22 +8,21 @@
 import SwiftUI
 
 struct PostListView: View {
+    var posts: [PostModel]
     @ObservedObject var postData = ReadJsonData() // Observed object for reading JSON data
     
     var body: some View {
-        VStack {
-            ForEach(postData.posts) { post in // Iterate over each post in the data
-                PostCard(post: post)
-                .padding(.top)
-            }
-            
-        }
+        VStack(spacing: 12) {
+                    ForEach(posts) { post in
+                        PostCard(post: post)
+                   }
+               }
         
     }
 }
 
-struct PostListView_Previews: PreviewProvider {
+/*struct PostListView_Previews: PreviewProvider {
     static var previews: some View {
         PostListView()
     }
-}
+}*/

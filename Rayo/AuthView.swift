@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct NavView: View {
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+
     var body: some View {
+      if isLoggedIn {
         TabView {
             MainView()
                 .tabItem {
@@ -18,7 +21,7 @@ struct NavView: View {
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                 }
-            Text("New Post")
+            AddPostView()
                 .tabItem {
                     Image(systemName: "square.and.pencil")
                 }
@@ -28,7 +31,10 @@ struct NavView: View {
                 }
         }
         .accentColor(.brown)
+    }else{
+        ContentView()
     }
+  }
 }
 struct NavView_Previews: PreviewProvider {
     static var previews: some View {

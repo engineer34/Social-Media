@@ -3,196 +3,173 @@
 //  Rayo
 //
 //  Created by Feliciano Medina on 11/10/25.
-//
+// package dependices
+import FirebaseAuth
+import FirebaseStorage
 import SwiftUI
 import Firebase
 import FirebaseFirestore
 
 import FirebaseAuth
 
-struct PostModel: Identifiable {
-    var id = UUID()
+struct PostModel: Identifiable, Codable {
+    @DocumentID var id: String? = nil
     var text: String
-    var timestamp: Date
+       var timestamp: Date
+       var userId: String
+       var email: String
+       var username: String
+       var imageURL: String
 }
+      
+
 
 struct Pro: View {
     
     @State private var postText = ""
         @State private var posts: [PostModel] = []
-        @State private var userEmail = ""
-        @State private var userUID = ""
+    @State private var profileImageURL = ""
+    @State private var showImageControl = false
+    @State private var selectedImage: UIImage?
+
         @State private var name = ""
         @State private var bio = ""
         
         private let db = Firestore.firestore()
-        
+    private let storage = Storage.storage()
+
         var body: some View {
             NavigationView {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        
-                        // this shows profile info including email,UID, and profile
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text("Profile")
-                                .font(.title2).bold()
-                            Text("Email: \(userEmail)")
-                            Text("User ID: \(userUID)")
-                        }
-                        .padding(.horizontal)
-                        
-                        Divider()
-                        
-                        // Help make a profile
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Create or update profile")
-                                .font(.headline)
-                            TextField(" your name", text: $name)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            TextField("Bio", text: $bio)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
-                            Button(action: saveProfile) {
-                                Label("Save Profile", systemImage: "person.crop.circle.badge.plus")
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.green)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        Divider()
-                        
-                        // add post
-                        VStack(alignment: .leading) {
-                            Text("Create a Post")
-                                .font(.headline)
-                            TextField("What's on your mind?", text: $postText)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
-                            Button(action: addPost) {
-                                Label("Post", systemImage: "paperplane.fill")
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                        }
-                        .padding(.horizontal)
-                        
-                        Divider()
-                        
-                        //recent posts
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Recent Posts")
-                                .font(.headline)
-                            ForEach(posts) { post in
-                                VStack(alignment: .leading) {
-                                    Text(post.text)
-                                        .font(.body)
-                                    Text(post.timestamp.formatted())
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
+                        ScrollView {
+                            VStack(spacing: 20) {
+
+                                // Profile Picture
+                                VStack {
+                                    if let img = selectedImage {
+                                        Image(uiImage: img)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 120, height: 120)
+                                            .clipShape(Circle())
+                                    } else if !profileImageURL.isEmpty {
+                                        AsyncImage(url: URL(string: profileImageURL)) { image in
+                                            image.resizable()
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                        .scaledToFill()
+                                        .frame(width: 120, height: 120)
+                                        .clipShape(Circle())
+                                    } else {
+                                        Circle()
+                                            .fill(Color.gray.opacity(0.3))
+                                            .frame(width: 120, height: 120)
+                                            .overlay(
+                                                Image(systemName: "camera")
+                                                    .font(.largeTitle)
+                                                    .foregroundColor(.gray)
+                                            )
+                                    }
+
+                                    Button("Change Profile Picture") {
+                                        showImageControl = true
+                                    }
                                 }
-                                .padding(.vertical, 4)
+
+                                // Name + Bio
+                                TextField("Your Name", text: $name)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                TextField("Bio", text: $bio)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                Button(action: saveProfile) {
+                                    Text("Save Profile")
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.green)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
                             }
+                            .padding()
                         }
-                        //had help with chatgpt to fix my alignment and padding since mine looked awful
-                        .padding(.horizontal)
+                        .navigationTitle("Profile")
+                        .onAppear { loadUserProfile() }
+                        .sheet(isPresented: $showImageControl) {
+                            ImagePicker(image: $selectedImage)
+                                .onDisappear {
+                                    if let img = selectedImage {
+                                        uploadProfileImage(img)
+                                    }
+                                }
+                        }
                     }
-                    .padding(.top)
-                }// nav title at the very top
-                .navigationTitle("Your Profile")
-                .onAppear {
-                    loadUserProfile()
-                    fetchPosts()
-                }
-            }
-        }
-        
-        // load user profile function
-        func loadUserProfile() {
-            if let user = Auth.auth().currentUser {
-                userEmail = user.email ?? "No email found"
-                userUID = user.uid
-                fetchProfile()
-            } else {
-                userEmail = "Not logged in"
-                userUID = "N/A"
-            }
-        }
-        
-        // get the profile connected from firebase
-        func fetchProfile() {
-            guard !userUID.isEmpty else { return }
-            db.collection("profiles").document(userUID).getDocument { snapshot, error in
-                if let data = snapshot?.data() {
-                    name = data["name"] as? String ?? ""
-                    bio = data["bio"] as? String ?? ""
-                }
-            }
-        }
-    // fetch posts from firestore
-    func fetchPosts() {
-        db.collection("posts")
-            .order(by: "timestamp", descending: true)
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    print("Error fetching posts: \(error.localizedDescription)")
-                    return
                 }
 
-                posts = snapshot?.documents.compactMap { doc in
-                    let data = doc.data()
-                    let text = data["text"] as? String ?? ""
-                    let timestamp = (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
-                    return PostModel(text: text, timestamp: timestamp)
-                } ?? []
-            }
-    }
-        // save to firebase this also uses the firestore library at the top
-        func saveProfile() {
-            guard let user = Auth.auth().currentUser else { return }
-            db.collection("profiles").document(user.uid).setData([
-                "name": name,
-                "bio": bio,
-                "email": user.email ?? ""
-            ]) { error in
-                if let error = error {
-                    print("Error saving profile: \(error.localizedDescription)")
-                } else {
-                    print("Profile saved!")
+                func loadUserProfile() {
+                    guard let uid = Auth.auth().currentUser?.uid else { return }
+
+                    db.collection("profiles").document(uid).getDocument { snap, err in
+                        if let data = snap?.data() {
+                            name = data["name"] as? String ?? ""
+                            bio = data["bio"] as? String ?? ""
+                            profileImageURL = data["profileImageURL"] as? String ?? ""
+                        }
+                    }
+                }
+
+                func uploadProfileImage(_ image: UIImage) {
+                    guard let uid = Auth.auth().currentUser?.uid else { return }
+                    guard let imageData = image.jpegData(compressionQuality: 0.6) else { return }
+
+                    let storageRef = Storage.storage().reference().child("profilePics/\(uid).jpg")
+                       let metadata = StorageMetadata()
+                       metadata.contentType = "image/jpeg"
+
+                       storageRef.putData(imageData, metadata: metadata) { metadata, error in
+                           if let error = error {
+                               print("Upload error: \(error.localizedDescription)")
+                               return
+                           }
+
+                           // Correct downloadURL signature: (URL?, Error?) -> Void
+                           storageRef.downloadURL { url, error in
+                               if let error = error {
+                                   print("Error getting download URL: \(error.localizedDescription)")
+                                   return
+                               }
+
+                               guard let url = url else {
+                                   print("downloadURL returned nil URL")
+                                   return
+                               }
+
+                               let profileImageURL = url.absoluteString
+                               // Save the download URL to Firestore (merge so you don't overwrite other profile fields)
+                               self.db.collection("profiles").document(uid).setData(["profileImageURL": profileImageURL], merge: true) { err in
+                                   if let err = err {
+                                       print("Error saving profile image URL: \(err.localizedDescription)")
+                                   } else {
+                                       print("Saved profile image URL!")
+                                       // Optionally update local state (so image shows immediately)
+                                       DispatchQueue.main.async {
+                                           self.profileImageURL = profileImageURL
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
+                func saveProfile() {
+                    guard let uid = Auth.auth().currentUser?.uid else { return }
+
+                    let data: [String: Any] = [
+                        "name": name,
+                        "bio": bio,
+                        "profileImageURL": profileImageURL
+                    ]
+
+                    db.collection("profiles").document(uid).setData(data, merge: true)
                 }
             }
-        }
-        
-        // add post
-        func addPost() {
-            guard !postText.isEmpty else { return }
-            guard let user = Auth.auth().currentUser else { return }
-
-               let newPost: [String: Any] = [
-                   "text": postText,
-                   "timestamp": Timestamp(date: Date()),
-                   "userId": user.uid,
-                   "email": user.email ?? ""
-               ]
-
-            db.collection("posts").addDocument(data: newPost) { error in
-                if let error = error {
-                    print("Error saving post: \(error.localizedDescription)")
-                } else {
-                    print("✅ Post saved successfully!")
-                    postText = ""
-                    fetchPosts() // refresh after posting
-                }
-            }
-        }
-    }
-
-    #Preview {
-        Pro()
-    }

@@ -8,24 +8,58 @@
 import SwiftUI
 
 struct PostCard: View {
-    //Properties for the post card
-    let post: Post
-    
-    var body: some View {
-        VStack {
-            Header(profile_img: post.profile_img,
-                   profile_name: post.profile_name,
-                   profile_id: post.profile_id
-               )
+    let post: PostModel
 
-               // Post body (main post image, likes, description, etc.)
-               PostBody(
-                   image: post.image,
-                   like_count: post.like_count,
-                   comment_count: post.comment_count,
-                   view_count: post.view_count,
-                   description: post.description
-               )
+    var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+
+                // USER HEADER
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 45, height: 45)
+                        .overlay(
+                            Text(post.username.prefix(1).uppercased())
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        )
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(post.username)
+                            .font(.headline)
+
+                        Text(post.email)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+
+                    Spacer()
+
+                    Text(post.timestamp.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+
+                // POST IMAGE
+                if !post.imageURL.isEmpty {
+                    AsyncImage(url: URL(string: post.imageURL)) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxHeight: 300)
+                            .clipped()
+                            .cornerRadius(12)
+                    } placeholder: {
+                        ProgressView()
+                    }
+                }
+
+                // CAPTION
+                Text(post.text)
+                    .font(.body)
+                    .padding(.top, 4)
+            }
+            .padding()
         }
     }
-}
+

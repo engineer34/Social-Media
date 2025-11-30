@@ -21,8 +21,11 @@ struct RayoApp: App {
     }
     var body: some Scene {
         WindowGroup {
-            NavView()
-            //ContentView()
+            if isLoggedIn {
+                            NavView()        // show main app AFTER login
+                        } else {
+                            ContentView()    // show login screen FIRST
+                        }
         }
     }
 }

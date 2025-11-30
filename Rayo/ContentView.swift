@@ -1,247 +1,120 @@
-//
 //  ContentView.swift
 //  Rayo
 //
-//  Created by Feliciano Medina on 9/11/25.
-//
-import FirebaseAuth
-import SwiftUI
-struct ContentView: View {
-    @State private var username = ""// string for our user
-    @State private var password = ""// password
-    @State private var wrongUsername = 0 // puts red when its invalid
-    @State private var wrongPassword = 0
-    @AppStorage("isLoggedIn") var isLoggedIn = false   // drives Navigation
-    @State private var errorMessage: String? = nil     // show errors if sign up/login fails
 
+import SwiftUI
+import FirebaseAuth
+
+struct ContentView: View {
+// sets isLogged in to false so you 
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+
+    @State private var username = ""
+    @State private var password = ""
+    @State private var wrongUsername = 0
+    @State private var wrongPassword = 0
+    @State private var errorMessage: String? = nil
+//connects to loginview
     var body: some View {
-        NavigationStack {
-            if isLoggedIn {
-                //logged in show the home page
-                MainView()
-                //if not just stay in login screen
-            } else {
-                           // Show login screen when Nnot logged in
-            loginView
-            }
-        }
+        loginView
     }
-            
-            
-            
+
+    // our loginview functionailty
     var loginView: some View {
         ZStack {
             Color.blue
                 .ignoresSafeArea()
+
             Circle()
                 .scale(1.7)
                 .foregroundColor(.white.opacity(0.15))
+
             Circle()
                 .scale(1.35)
                 .foregroundColor(.white)
-            
+
             VStack(spacing: 20) {
+
                 Text("Login")
                     .font(.largeTitle)
                     .bold()
                     .padding(.top, 50)
-                //emailfield
+
                 TextField("Email", text: $username)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .padding()
-                    .frame(width: 321, height:53)
+                    .frame(width: 321, height: 53)
                     .background(Color.black.opacity(0.07))
                     .cornerRadius(9)
-                    .border(.red, width: CGFloat(wrongUsername))
-                //password
+
                 SecureField("Password", text: $password)
                     .padding()
-                    .frame(width: 321, height:53)
+                    .frame(width: 321, height: 53)
                     .background(Color.black.opacity(0.07))
                     .cornerRadius(9)
-                    .border(.red, width: CGFloat(wrongPassword))
-                
-                // Show error messages
+
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal)
                 }
-                
-                // Login Button
+                //creates our button login and the color and size
                 Button("Login to Rayo") {
-                    authenticateUser(username: username, password: password)
+                    authenticateUser()
                 }
                 .foregroundColor(.white)
                 .frame(width: 321, height: 53)
                 .background(Color.blue)
                 .cornerRadius(7)
-                
-                // Sign Up Button
+                //creates our button sign up and the color and size
                 Button("Sign Up") {
-                    signUpUser(username: username, password: password)
+                    signUpUser()
                 }
                 .foregroundColor(.white)
                 .frame(width: 321, height: 53)
                 .background(Color.green)
                 .cornerRadius(7)
-                
-                // Hidden NavigationLink
             }
         }
     }
 
-    // Firebase Login
-    // function for authentication
-    func authenticateUser(username: String, password: String) {
-        Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
+    // login function authenticator
+    func authenticateUser() {
+        Auth.auth().signIn(withEmail: username, password: password) { result, error in
+// if our login fails prints login failed
             if let error = error {
-                // shows login did not go through
                 print("Login failed: \(error.localizedDescription)")
                 wrongUsername = 2
                 wrongPassword = 2
                 errorMessage = error.localizedDescription
-                isLoggedIn = false
-            } else {
-                // prints out login was successful
-                print("Login successful for \(authResult?.user.email ?? "")")
-                wrongUsername = 0
-                wrongPassword = 0
-                errorMessage = nil
-                isLoggedIn = true
+                return
             }
+//if error doesnt occur then prints logging in was successful
+            print("Login successful!")
+            wrongUsername = 0
+            wrongPassword = 0
+            errorMessage = nil
+
+            // THIS make NavView switch to MainView by setting it to to true
+            isLoggedIn = true
         }
     }
 
-    // Firebase Sign up
-    func signUpUser(username: String, password: String) {
-        Auth.auth().createUser(withEmail: username, password: password) { authResult, error in
+    // helps user sign up function
+    func signUpUser() {
+        Auth.auth().createUser(withEmail: username, password: password) { result, error in
+
             if let error = error {
-            print("Sign up failed: \(error.localizedDescription)")
-            errorMessage = error.localizedDescription
-                isLoggedIn = false
+                errorMessage = error.localizedDescription
                 return
             }
-            print("User created: \(authResult?.user.email ?? "")")
+
+            print("User created!")
             errorMessage = nil
+
+            // helps you login once you finish signing up
             isLoggedIn = true
         }
     }
 }
-//prev
-//#Preview {
- //   ContentView()
-//}
-/*import SwiftUI
-import FirebaseAuth
-struct ContentView: View {
-    @State private var username = ""//user string
-    @State private var password = ""//password string
-    @State private var wrongUsername = 0
-    @State private var wrongPassword = 0
-    @State private var errorMessage: String? = nil
-    @State private var navToHome: String? = nil//drives navigation
-    var body: some View {
-        NavigationView {
-            ZStack {
-                Color.blue
-                    .ignoresSafeArea()
-            Circle()
-                    .scale(1.7)
-                    .foregroundColor(.white.opacity(0.15))
-            Circle()
-                    .scale(1.35)
-                    .foregroundColor(.white)
-            
-                VStack {
-                    //Text("Rayo")
-                     //   .font(.largeTitle)
-                        
-                     //   .bold()
-                     //   .padding(.bottom, 120) //space for Rayo and Login
-                    Text("Login")
-                        .font(.largeTitle)
-                        .bold()
-                        .padding(.top, 50)
-                    TextField("Username", text: $username)
-                        .padding()
-                        .frame(width: 320, height:50)
-                        .background(Color.black.opacity(0.07))
-                        .cornerRadius(9)
-                        .border(.red, width: CGFloat(wrongUsername))
-                    TextField("Email", text: $username)
-                        .keyboardType(.emailAddress)
-                        .autocapitalization(.none)
-                        .padding()
-                        .frame(width: 320, height:50)
-                        .background(Color.black.opacity(0.07))
-                        .cornerRadius(9)
-                        .border(.red, width: CGFloat(wrongUsername))
-
-                    SecureField("Password", text: $password)
-                        .padding()
-                        .frame(width: 320, height:50)
-                        .background(Color.black.opacity(0.07))
-                        .cornerRadius(9)
-                        .border(.red, width: CGFloat(wrongPassword))
-                    if let errorMessage = errorMessage {
-                        Text(errorMessage)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                                        }
-                    Button("Login to Rayo") {
-                        //Authenticate user
-                        authenticateUser(username: username, password: password)
-                    }
-                    .foregroundColor(.white)
-                    .frame(width: 320, height: 50)
-                    .background(Color.blue)
-                    .cornerRadius(7)
-                    Button("Sign Up") {
-                    signUpUser(username: username, password: password)
-                                        }
-                    .foregroundColor(.white)
-                    .frame(width: 320, height: 50)
-                    .background(Color.green)
-                    .cornerRadius(7)
-                    
-                    // Hidden NavigationLink
-                    NavigationLink("", value: navToHome)
-                        .opacity(0)
-                }
-            }
-            .navigationDestination(for: String.self) { user in
-                Text("You are logged in as \(user)")
-                    .font(.title)
-                    .padding()
-            }
-        }
-    }ion(for: String.self) { user in
-                Text("You are logging in @\(user)")
-            }
-            
-        }
-    }
-    func authenticateUser(username: String, password: String) {
-        Auth.auth().signIn(withEmail: username, password: password) { authResult, error in
-                   if let error = error {
-                       print("Login failed: \(error.localizedDescription)")
-                       wrongUsername = 2
-                       wrongPassword = 2
-                       navToHome = nil
-                   } else {
-                       print("Login successful for \(authResult?.user.email ?? "")")
-                       wrongUsername = 0
-                       wrongPassword = 0
-                       navToHome = authResult?.user.email // 👈 this drives Navigation
-                   }
-               }
-           }
-       }
-
-#Preview {
-    ContentView()
-} */
